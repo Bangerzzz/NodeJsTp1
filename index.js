@@ -1,23 +1,29 @@
 const http = require("http");
+const fs = require('fs');
+const path = require('path');
 const host = 'localhost';
 const port = 5000;
 const requestListener = function (req, res) {
     try{
         if (req.method=="GET" && req.url=="/"){
             res.writeHead(200,{"Content-Type": "text/html; charset=utf-8"});
-            res.end(`<html><body><h1>HELLO WORLD Omar !</h1></body></html>`);
+            res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "index.html")));
+            res.end();
         }
         else if (req.method!="GET" && req.url=="/"){
             res.writeHead(401,{"Content-Type": "text/html; charset=utf-8"})
-            res.end(`<h1>401 Méthode non authorisée</h1>`);
+            res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "not_allowed.html")));
+            res.end();
         }
         else {
             res.writeHead(404,{"Content-Type": "text/html; charset=utf-8"})
-            res.end(`<h1>404 Not Found</h1>`)
+            res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "not_found.html")));
+            res.end();
         }
     }catch(error){
         res.writeHead(500,{"Content-Type": "text/html; charset=utf-8"})
-        res.end(`<h1>500 Internal serveur error</h1>`)
+        res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "interal_serveur_error.html")));
+        res.end();
     }
 };
 const server = http.createServer(requestListener);
