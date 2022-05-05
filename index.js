@@ -39,7 +39,36 @@ const requestListener = function (req, res) {
                 res.writeHead(200, { 'content-type': 'application/json' });
                 res.write(JSON.stringify(mapToObj(memoryDb)));
                 res.end();
-            } else {
+            } 
+            else if (req.method === "POST") {
+                let data = ''
+                req.on('data', chunk => {
+                    data += chunk;
+                })
+                req.on('end', () => {
+                    try {
+                        if (typeof data === undefined) {
+                            throw 'bad request'
+                        } else {
+                            data = JSON.parse(data)
+                            if (!('name' in data)) {
+                                throw 'bad request - test'
+                            }
+                            let currentId = id
+                            memoryDb.set(id++, data)
+                            res.writeHead(201, { 'content-type': 'application/json' });
+                            res.write(JSON.stringify(memoryDb.get(currentId)));
+                            res.end();
+                        }
+                    } catch (err) {
+                        console.log(err)
+                        res.writeHead(400, { 'content-type': 'text/html' });
+                        res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "bad_request.html")));
+                        res.end()
+                    }
+                });
+            } 
+            else {
                 res.writeHead(405, { 'content-type': 'text/html' });
                 res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "method_not_allowed.html")));
                 res.end();
