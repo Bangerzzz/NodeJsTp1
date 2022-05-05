@@ -34,6 +34,17 @@ const requestListener = function (req, res) {
                 res.end();
             }
         }
+        else if (req.url === "/api/names") {
+            if (req.method === "GET") {
+                res.writeHead(200, { 'content-type': 'application/json' });
+                res.write(JSON.stringify(mapToObj(memoryDb)));
+                res.end();
+            } else {
+                res.writeHead(405, { 'content-type': 'text/html' });
+                res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "method_not_allowed.html")));
+                res.end();
+            }
+        }
         else {
             res.writeHead(404,{"Content-Type": "text/html; charset=utf-8"})
             res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "not_found.html")));
@@ -45,6 +56,20 @@ const requestListener = function (req, res) {
         res.end();
     }
 };
+
+const memoryDb = new Map(); // est global
+let id = 0; // doit être global
+memoryDb.set(id++, {nom: "Alice"}) // voici comment set une nouvelle entrée.
+memoryDb.set(id++, {nom: "Bob"})
+memoryDb.set(id++, {nom: "Charlie"})
+
+const mapToObj = m => {
+    return Array.from(m).reduce((obj, [key, value]) => {
+      obj[key] = value;
+      return obj;
+    }, {});
+};
+
 const server = http.createServer(requestListener);
 server.listen(port, host, () => {
     console.log(`Server is running on http://${host}:${port}`);
