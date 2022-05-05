@@ -81,7 +81,39 @@ const requestListener = function (req, res) {
                 res.writeHead(200, { 'content-type': 'application/json' });
                 res.write(JSON.stringify(memoryDb.get(parseInt(id))));
                 res.end();
-            } else {
+            } 
+            else if (req.method === "DELETE") {
+                memoryDb.delete(parseInt(id))
+                res.writeHead(204);
+                res.end();
+            }
+            else if (req.method === "PUT") {
+                let data = '';
+                req.on('data', chunk => {
+                    data += chunk;
+                });
+                req.on('end', () => {
+                    try {
+                        if (typeof data === undefined) {
+                            throw 'bad request'
+                        } else {
+                            data = JSON.parse(data)
+                            if (!('name' in data)) {
+                                throw 'bad request - test'
+                            }
+                            memoryDb.set(id, data)
+                            res.writeHead(204);
+                            res.end();
+                        }
+                    } catch (err) {
+                        console.log(err)
+                        res.writeHead(400, { 'content-type': 'text/html' });
+                        res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "bad_request.html")));
+                        res.end()
+                    }
+                });
+            }
+            else {
                 res.writeHead(405, { 'content-type': 'text/html' });
                 res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "method_not_allowed.html")));
                 res.end();
