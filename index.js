@@ -77,7 +77,11 @@ const requestListener = function (req, res) {
         else if (req.url.match(/\/api\/name\/*/)) {
             const split = req.url.split('/')
             const id = split[split.length-1]
-            if (req.method === "GET") {
+            if (!memoryDb.has(id)) {
+                res.writeHead(404, { 'content-type': 'text/html' });
+                res.write(fs.readFileSync(path.join(__dirname, "public", "pages", "not_found.html")));
+                res.end();
+            }else if (req.method === "GET") {
                 res.writeHead(200, { 'content-type': 'application/json' });
                 res.write(JSON.stringify(memoryDb.get(parseInt(id))));
                 res.end();
